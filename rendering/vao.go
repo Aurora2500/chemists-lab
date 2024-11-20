@@ -4,7 +4,7 @@ import (
 	"errors"
 	"reflect"
 
-	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/go-gl/gl/v4.3-compatibility/gl"
 	"github.com/go-gl/mathgl/mgl32"
 )
 
@@ -18,6 +18,14 @@ var (
 
 type Vao struct {
 	id id
+}
+
+func (vao *Vao) Id() id {
+	return vao.id
+}
+
+func (vao *Vao) Bind() {
+	gl.BindVertexArray(vao.id)
 }
 
 func set_attrib(loc id, vertex reflect.Type, field reflect.StructField) error {
@@ -35,12 +43,12 @@ func set_attrib(loc id, vertex reflect.Type, field reflect.StructField) error {
 	default:
 		return ErrUnhandledType
 	}
-
+	println("vertex", field.Name, num, field.Offset, field.Type.Size(), "loc", loc)
 	gl.VertexAttribPointerWithOffset(loc, num, gl.FLOAT, false, int32(vertex.Size()), field.Offset)
 	return nil
 }
 
-func CreateVAO[T any](program *Shader) (*Vao, error) {
+func NewVao[T any](program *Shader) (*Vao, error) {
 	t := reflect.TypeOf((*T)(nil)).Elem()
 	if t.Kind() != reflect.Struct {
 		return nil, ErrNonStructVertex
@@ -48,6 +56,7 @@ func CreateVAO[T any](program *Shader) (*Vao, error) {
 
 	var vao Vao
 	gl.GenVertexArrays(1, &vao.id)
+	gl.BindVertexArray(vao.id)
 
 	for i := 0; i < t.NumField(); i++ {
 		f := t.Field(i)
@@ -55,8 +64,8 @@ func CreateVAO[T any](program *Shader) (*Vao, error) {
 		if name == "" {
 			name = f.Name
 		}
-		println("field name:", name)
 		loc := uint32(gl.GetAttribLocation(program.id, gl.Str(name+"\x00")))
+		gl.VertexArrayAttribBinding(vao.id, loc, 0)
 		gl.EnableVertexArrayAttrib(vao.id, loc)
 		set_attrib(loc, t, f)
 	}
