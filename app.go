@@ -39,12 +39,10 @@ func runApp() {
 	if err != nil {
 		panic(err)
 	}
-	vbo.Bind()
-	vao, err := rendering.NewVao[Vert](s)
+	vao, err := rendering.NewVao[Vert](s, vbo)
 	if err != nil {
 		panic(err)
 	}
-	gl.VertexArrayVertexBuffer(vao.Id(), 0, vbo.Id(), 0, 20)
 	gl.ClearColor(0.0, 0.0, 0.0, 1.0)
 	for window.Running() {
 		window.Clear()

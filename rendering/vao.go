@@ -28,6 +28,10 @@ func (vao *Vao) Bind() {
 	gl.BindVertexArray(vao.id)
 }
 
+func (vao *Vao) Delete() {
+	gl.DeleteVertexArrays(1, &vao.id)
+}
+
 func set_attrib(loc id, vertex reflect.Type, field reflect.StructField) error {
 
 	var num int32
@@ -48,7 +52,7 @@ func set_attrib(loc id, vertex reflect.Type, field reflect.StructField) error {
 	return nil
 }
 
-func NewVao[T any](program *Shader) (*Vao, error) {
+func NewVao[T any](program *Shader, vbo *Vbo) (*Vao, error) {
 	t := reflect.TypeOf((*T)(nil)).Elem()
 	if t.Kind() != reflect.Struct {
 		return nil, ErrNonStructVertex
@@ -57,6 +61,8 @@ func NewVao[T any](program *Shader) (*Vao, error) {
 	var vao Vao
 	gl.GenVertexArrays(1, &vao.id)
 	gl.BindVertexArray(vao.id)
+	vbo.Bind()
+	gl.VertexArrayVertexBuffer(vao.id, 0, vbo.id, 0, int32(t.Size()))
 
 	for i := 0; i < t.NumField(); i++ {
 		f := t.Field(i)
