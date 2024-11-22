@@ -3,7 +3,7 @@ package rendering
 import (
 	"reflect"
 
-	"github.com/go-gl/gl/v4.3-compatibility/gl"
+	"github.com/go-gl/gl/v4.3-core/gl"
 )
 
 type Vbo struct {

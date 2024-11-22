@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/go-gl/gl/v4.3-compatibility/gl"
+	"github.com/go-gl/gl/v4.3-core/gl"
 )
 
 type Shader struct {
 	id   id
-	locs map[string]id
+	locs map[string]int32
 }
 
 func NewShader(src string) (*Shader, error) {
@@ -62,6 +62,7 @@ func NewShader(src string) (*Shader, error) {
 	gl.DeleteShader(vert)
 	gl.DeleteShader(frag)
 
+	shader.locs = make(map[string]int32)
 	return &shader, nil
 }
 
@@ -100,10 +101,16 @@ func (s *Shader) Delete() {
 	gl.DeleteProgram(s.id)
 }
 
-func (s *Shader) get_attrib_loc(name string) id {
+func (s *Shader) get_uniform_loc(name string) int32 {
 	loc, ok := s.locs[name]
 	if !ok {
-		loc = uint32(gl.GetAttribLocation(s.id, gl.Str(name+"\x00")))
+		loc = gl.GetUniformLocation(s.id, gl.Str(name+"\x00"))
+		s.locs[name] = loc
 	}
 	return loc
+}
+
+func (s *Shader) SetUniformMat4(uniform string, x Mat4) {
+	loc := int32(s.get_uniform_loc(uniform))
+	gl.ProgramUniformMatrix4fv(s.id, loc, 1, false, &x[0])
 }

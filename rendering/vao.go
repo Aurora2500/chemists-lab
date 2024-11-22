@@ -4,7 +4,7 @@ import (
 	"errors"
 	"reflect"
 
-	"github.com/go-gl/gl/v4.3-compatibility/gl"
+	"github.com/go-gl/gl/v4.3-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 )
 
@@ -30,6 +30,10 @@ func (vao *Vao) Bind() {
 
 func (vao *Vao) Delete() {
 	gl.DeleteVertexArrays(1, &vao.id)
+}
+
+func (vao *Vao) BindEbo(ebo *Ebo) {
+	gl.VertexArrayElementBuffer(vao.id, ebo.id)
 }
 
 func set_attrib(loc id, vertex reflect.Type, field reflect.StructField) error {

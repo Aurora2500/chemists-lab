@@ -2,21 +2,17 @@ package main
 
 import (
 	"chemists-lab/rendering"
+	"chemists-lab/rendering/primitives"
+	"chemists-lab/resources"
 	win "chemists-lab/windowing"
-	"os"
+	"cmp"
+	"math"
 
-	"github.com/go-gl/gl/v4.3-compatibility/gl"
+	"github.com/go-gl/glfw/v3.2/glfw"
 )
 
-type Vert struct {
-	pos rendering.Vec2
-	col rendering.Vec3
-}
-
-var trongle = []Vert{
-	{pos: rendering.Vec2{-.5, -.5}, col: rendering.Vec3{1., 0., 0.}},
-	{pos: rendering.Vec2{.5, -.5}, col: rendering.Vec3{0., 1., 0.}},
-	{pos: rendering.Vec2{.0, .5}, col: rendering.Vec3{0., 0., 1.}},
+func clamp[T cmp.Ordered](x, lo, hi T) T {
+	return max(min(x, hi), lo)
 }
 
 func runApp() {
@@ -25,32 +21,45 @@ func runApp() {
 		panic(err)
 	}
 	defer window.Destroy()
-	tronglesrc, err := os.ReadFile("shaders/trongle.glsl")
-	if err != nil {
-		panic(err)
+	manager := resources.NewManager("assets")
+
+	cam := rendering.OrbitCamera{}
+	cam.Distance = -20
+	var drag bool = false
+
+	width, height := window.Size()
+	lens := rendering.PerspectiveLens{
+		Near:   0.1,
+		Far:    500,
+		Width:  uint32(width),
+		Height: uint32(height),
+		Fov:    60.,
 	}
 
-	s, err := rendering.NewShader(string(tronglesrc))
-	if err != nil {
-		panic(err)
-	}
+	window.MouseButtonCallback(func(w *glfw.Window, button glfw.MouseButton, action glfw.Action, mod glfw.ModifierKey) {
+		if button == glfw.MouseButtonRight {
+			drag = (action == glfw.Press)
+		}
+	})
+	window.MouseCallback(func(w *glfw.Window, xpos, ypos float64) {
+		if drag {
+			cam.Yaw += float32(xpos)
+			cam.Pitch = clamp(cam.Pitch+float32(ypos), -math.Pi/2, math.Pi/2)
+		}
+	})
+
+	s := manager.GetShader("sphere")
 	s.Use()
-	vbo, err := rendering.NewVbo(trongle)
-	if err != nil {
-		panic(err)
-	}
-	vao, err := rendering.NewVao[Vert](s, vbo)
-	if err != nil {
-		panic(err)
-	}
-	gl.ClearColor(0.0, 0.0, 0.0, 1.0)
+
+	sphere := primitives.GenIcosphere(3, s)
+
 	for window.Running() {
 		window.Clear()
 
-		vao.Bind()
-		vbo.Bind()
+		vp := lens.Projection().Mul4(cam.View())
+		s.SetUniformMat4("vp", vp)
 
-		gl.DrawArrays(gl.TRIANGLES, 0, 3)
+		sphere.Draw()
 
 		window.Swap()
 	}

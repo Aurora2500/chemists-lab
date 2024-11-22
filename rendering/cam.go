@@ -27,12 +27,12 @@ func (cam *OrbitCamera) View() mgl32.Mat4 {
 }
 
 type PerspectiveLens struct {
-	near, far     float32
-	width, height uint32
-	fov           float32
+	Near, Far     float32
+	Width, Height uint32
+	Fov           float32
 }
 
-func (lens *PerspectiveLens) Perspective() Mat4 {
-	aspect := float32(lens.height) / float32(lens.width)
-	return mgl32.Perspective(lens.fov, aspect, lens.near, lens.far)
+func (lens *PerspectiveLens) Projection() Mat4 {
+	aspect := float32(lens.Height) / float32(lens.Width)
+	return mgl32.Perspective(lens.Fov, aspect, lens.Near, lens.Far)
 }

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"unsafe"
 
-	"github.com/go-gl/gl/v4.3-compatibility/gl"
+	"github.com/go-gl/gl/v4.3-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 )
 
@@ -18,7 +18,7 @@ func CreateWindow(title string) (*Window, error) {
 	glfw.WindowHint(glfw.Resizable, glfw.False)
 	glfw.WindowHint(glfw.ContextVersionMajor, 4)
 	glfw.WindowHint(glfw.ContextVersionMinor, 3)
-	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCompatProfile)
+	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
 
 	window, err := glfw.CreateWindow(1600, 900, title, nil, nil)
@@ -54,6 +54,7 @@ func CreateWindow(title string) (*Window, error) {
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.LESS)
 
+	gl.ClearColor(0.0, 0.0, 0.0, 1.0)
 	return &Window{window: window}, nil
 }
 
@@ -79,4 +80,8 @@ func (win *Window) Swap() {
 	}
 	win.window.SwapBuffers()
 	glfw.PollEvents()
+}
+
+func (win *Window) Size() (int, int) {
+	return win.window.GetSize()
 }
