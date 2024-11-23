@@ -51,7 +51,6 @@ func set_attrib(loc id, vertex reflect.Type, field reflect.StructField) error {
 	default:
 		return ErrUnhandledType
 	}
-	println("vertex", field.Name, num, field.Offset, field.Type.Size(), "loc", loc)
 	gl.VertexAttribPointerWithOffset(loc, num, gl.FLOAT, false, int32(vertex.Size()), field.Offset)
 	return nil
 }

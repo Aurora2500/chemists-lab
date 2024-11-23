@@ -9,3 +9,7 @@ func (win *Window) MouseCallback(cb glfw.CursorPosCallback) {
 func (win *Window) MouseButtonCallback(cb glfw.MouseButtonCallback) {
 	win.window.SetMouseButtonCallback(cb)
 }
+
+func (win *Window) MouseScrollCallback(cb glfw.ScrollCallback) {
+	win.window.SetScrollCallback(cb)
+}

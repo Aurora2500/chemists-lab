@@ -18,12 +18,12 @@ type OrbitCamera struct {
 }
 
 func (cam *OrbitCamera) View() mgl32.Mat4 {
-	var trans Mat4
-	trans = mgl32.Translate3D(0, 0, -cam.Distance)
-	trans = mgl32.HomogRotate3DX(cam.Pitch).Mul4(trans)
-	trans = mgl32.HomogRotate3DY(cam.Yaw).Mul4(trans)
-	trans = mgl32.Translate3D(-cam.Focus.X(), -cam.Focus.Y(), -cam.Focus.Z()).Mul4(trans)
-	return trans
+	return transPipeline(
+		mgl32.Translate3D(0, 0, -cam.Distance),
+		mgl32.HomogRotate3DX(cam.Pitch),
+		mgl32.HomogRotate3DY(cam.Yaw),
+		mgl32.Translate3D(-cam.Focus.X(), -cam.Focus.Y(), -cam.Focus.Z()),
+	)
 }
 
 type PerspectiveLens struct {
@@ -33,6 +33,14 @@ type PerspectiveLens struct {
 }
 
 func (lens *PerspectiveLens) Projection() Mat4 {
-	aspect := float32(lens.Height) / float32(lens.Width)
-	return mgl32.Perspective(lens.Fov, aspect, lens.Near, lens.Far)
+	aspect := float32(lens.Width) / float32(lens.Height)
+	return mgl32.Perspective(mgl32.DegToRad(lens.Fov), aspect, lens.Near, lens.Far)
+}
+
+func transPipeline(transformations ...Mat4) Mat4 {
+	mat := mgl32.Ident4()
+	for _, t := range transformations {
+		mat = mat.Mul4(t)
+	}
+	return mat
 }

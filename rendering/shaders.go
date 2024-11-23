@@ -68,7 +68,7 @@ func NewShader(src string) (*Shader, error) {
 
 func compileShader(src string, shaderType id) (id, error) {
 	shader := gl.CreateShader(shaderType)
-	csources, free := gl.Strs(src)
+	csources, free := gl.Strs(src + "\x00")
 	gl.ShaderSource(shader, 1, csources, nil)
 	free()
 	gl.CompileShader(shader)
@@ -81,8 +81,8 @@ func compileShader(src string, shaderType id) (id, error) {
 
 		log := strings.Repeat("\x00", int(logLength+1))
 		gl.GetShaderInfoLog(shader, logLength, nil, gl.Str(log))
-
-		return 0, fmt.Errorf("failed to compile %v: %v", src, log)
+		gpu_src := gl.GoStr(*csources)
+		return 0, fmt.Errorf("failed to compile %v: %v", gpu_src, log)
 	}
 
 	return shader, nil

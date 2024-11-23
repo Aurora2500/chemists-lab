@@ -9,11 +9,14 @@ import (
 	"math"
 
 	"github.com/go-gl/glfw/v3.2/glfw"
+	"github.com/go-gl/mathgl/mgl32"
 )
 
 func clamp[T cmp.Ordered](x, lo, hi T) T {
 	return max(min(x, hi), lo)
 }
+
+const sensitivity = 0.01
 
 func runApp() {
 	window, err := win.CreateWindow("Chemist's Lab")
@@ -24,8 +27,9 @@ func runApp() {
 	manager := resources.NewManager("assets")
 
 	cam := rendering.OrbitCamera{}
-	cam.Distance = -20
+	cam.Distance = 30
 	var drag bool = false
+	var dragPos rendering.Vec2
 
 	width, height := window.Size()
 	lens := rendering.PerspectiveLens{
@@ -43,9 +47,17 @@ func runApp() {
 	})
 	window.MouseCallback(func(w *glfw.Window, xpos, ypos float64) {
 		if drag {
-			cam.Yaw += float32(xpos)
-			cam.Pitch = clamp(cam.Pitch+float32(ypos), -math.Pi/2, math.Pi/2)
+			dragx := dragPos.X() - float32(xpos)
+			dragy := dragPos.Y() - float32(ypos)
+			cam.Yaw -= float32(sensitivity * dragx)
+			cam.Yaw = float32(math.Mod(float64(cam.Yaw), 2*math.Pi))
+			cam.Pitch -= float32(sensitivity * dragy)
+			cam.Pitch = clamp(cam.Pitch, -math.Pi/2, math.Pi/2)
 		}
+		dragPos = rendering.Vec2{float32(xpos), float32(ypos)}
+	})
+	window.MouseScrollCallback(func(w *glfw.Window, xoff, yoff float64) {
+		cam.Distance = clamp(cam.Distance-float32(yoff), 1, 100)
 	})
 
 	s := manager.GetShader("sphere")
@@ -53,13 +65,25 @@ func runApp() {
 
 	sphere := primitives.GenIcosphere(3, s)
 
+	positions := []rendering.Vec3{
+		{0, 0, 0},
+		{2, 2, 1},
+		{20, 0, 0},
+		{-20, 0, 0},
+		{0, 0, 20},
+		{0, 0, -20},
+	}
+
 	for window.Running() {
 		window.Clear()
 
-		vp := lens.Projection().Mul4(cam.View())
-		s.SetUniformMat4("vp", vp)
-
-		sphere.Draw()
+		s.SetUniformMat4("view", cam.View())
+		s.SetUniformMat4("proj", lens.Projection())
+		for _, pos := range positions {
+			model := mgl32.Translate3D(pos.X(), pos.Y(), pos.Z())
+			s.SetUniformMat4("model", model)
+			sphere.Draw()
+		}
 
 		window.Swap()
 	}
