@@ -10,6 +10,7 @@ import (
 
 type Window struct {
 	window *glfw.Window
+	cbr    *CallbackRegistry
 }
 
 func CreateWindow(title string) (*Window, error) {
@@ -50,12 +51,17 @@ func CreateWindow(title string) (*Window, error) {
 		// fmt.Printf("Severity: 0x%x\n", severity)
 		fmt.Printf("Message: %s\n", message)
 	}, nil)
+	gl.DebugMessageControl(gl.DEBUG_SOURCE_API, gl.DEBUG_TYPE_OTHER, gl.DONT_CARE, 0, nil, false)
 
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.LESS)
+	var win *Window = &Window{window: window, cbr: &CallbackRegistry{}}
 
 	gl.ClearColor(0.0, 0.0, 0.0, 1.0)
-	return &Window{window: window}, nil
+
+	win.setupRegistry()
+
+	return win, nil
 }
 
 func (win *Window) Destroy() {

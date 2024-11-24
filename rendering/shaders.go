@@ -86,7 +86,6 @@ func compileShader(src string, shaderType id) (id, error) {
 	}
 
 	return shader, nil
-
 }
 
 func (s *Shader) Id() id {
