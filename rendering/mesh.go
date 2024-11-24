@@ -6,6 +6,7 @@ import (
 
 type Mesh interface {
 	Draw()
+	DrawInstanced(n int32)
 }
 
 type ObjectMesh struct {
@@ -45,7 +46,12 @@ func NewIndexedMesh[V any, I OpenGLIndex](verts []V, indices []I, s *Shader) Ind
 
 func (mesh *IndexedMesh) Draw() {
 	mesh.vao.Bind()
-	gl.DrawElementsWithOffset(gl.TRIANGLES, int32(mesh.ebo.length), uint32(mesh.ebo.indexType), 0)
+	gl.DrawElementsWithOffset(gl.TRIANGLES, int32(mesh.ebo.length), mesh.ebo.indexType, 0)
+}
+
+func (mesh *IndexedMesh) DrawInstanced(n int32) {
+	mesh.vao.Bind()
+	gl.DrawElementsInstanced(gl.TRIANGLES, int32(mesh.ebo.length), mesh.ebo.indexType, gl.PtrOffset(0), n)
 }
 
 type InstancedMesh struct {

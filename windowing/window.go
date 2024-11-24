@@ -57,7 +57,7 @@ func CreateWindow(title string) (*Window, error) {
 	gl.DepthFunc(gl.LESS)
 	var win *Window = &Window{window: window, cbr: &CallbackRegistry{}}
 
-	gl.ClearColor(0.0, 0.0, 0.0, 1.0)
+	gl.ClearColor(0.8, 0.8, 0.8, 1.0)
 
 	win.setupRegistry()
 

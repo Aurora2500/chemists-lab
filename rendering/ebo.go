@@ -9,7 +9,7 @@ import (
 type Ebo struct {
 	id        id
 	length    uint32
-	indexType int
+	indexType uint32
 }
 
 func NewEBO[I OpenGLIndex](indices []I) *Ebo {
@@ -29,7 +29,7 @@ type OpenGLIndex interface {
 	uint8 | uint16 | uint32
 }
 
-func IndexType[I OpenGLIndex]() int {
+func IndexType[I OpenGLIndex]() uint32 {
 	t := reflect.TypeFor[I]()
 
 	switch t {
