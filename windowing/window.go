@@ -44,12 +44,11 @@ func CreateWindow(title string) (*Window, error) {
 		length int32,
 		message string,
 		userParam unsafe.Pointer) {
-		fmt.Printf("OpenGL Debug Message\n")
 		// fmt.Printf("Source: 0x%x\n", source)
 		// fmt.Printf("Type: 0x%x\n", gltype)
 		// fmt.Printf("ID: %d\n", id)
 		// fmt.Printf("Severity: 0x%x\n", severity)
-		fmt.Printf("Message: %s\n", message)
+		fmt.Printf("OpenGL: %s\n", message)
 	}, nil)
 	gl.DebugMessageControl(gl.DEBUG_SOURCE_API, gl.DEBUG_TYPE_OTHER, gl.DONT_CARE, 0, nil, false)
 

@@ -7,8 +7,6 @@ import (
 	"chemists-lab/resources"
 	win "chemists-lab/windowing"
 	"math/rand"
-
-	"github.com/go-gl/gl/v2.1/gl"
 )
 
 func runApp() {
@@ -18,7 +16,6 @@ func runApp() {
 	}
 	defer window.Destroy()
 	manager := resources.NewManager("assets")
-
 	cam := rendering.OrbitCamera{}
 	cam.Distance = 10
 	width, height := window.Size()
@@ -41,31 +38,41 @@ func runApp() {
 	s.Use()
 
 	sphere := primitives.GenIcosphere(5, s)
-	positions := []rendering.Vec4{
-		{0, 0, 0},
-		{20, 0, 0},
-		{-20, 0, 0},
-		{0, 0, 20},
-		{0, 0, -20},
+	type Vec3 = rendering.Vec3
+	type atom struct {
+		pos          Vec3
+		atomicNumber int32
+	}
+	atoms := []atom{
+		{pos: Vec3{0, 0, 0}, atomicNumber: 0},
+		{pos: Vec3{2, 0, 0}, atomicNumber: 1},
+		{pos: Vec3{-2, 0, 0}, atomicNumber: 0},
+		{pos: Vec3{0, 0, 2}, atomicNumber: 0},
+		{pos: Vec3{0, 0, -2}, atomicNumber: 1},
 	}
 
-	ssbo := rendering.NewSsbo[rendering.Vec4]()
-	ssbo.Allocate(len(positions), gl.STREAM_DRAW)
-	ssbo.Update(positions)
+	ssbo := rendering.NewSsbo[atom]()
+	ssbo.Allocate(len(atoms), rendering.STREAM_DRAW)
+	ssbo.Update(atoms)
+	pt := game.NewPeriodicTable()
+
+	var timer win.Timer
 
 	for window.Running() {
 		window.Clear()
+		dt := timer.Tick()
 
 		ccam.SetVP(s)
-		ssbo.BindShader(0)
-		sphere.DrawInstanced(int32(len(positions)))
+		pt.Ssbo.BindShader(0)
+		ssbo.BindShader(1)
+		sphere.DrawInstanced(int32(len(atoms)))
 
-		for i := range positions {
-			positions[i][0] += (rand.Float32() - 0.5) * 0.2
-			positions[i][1] += (rand.Float32() - 0.5) * 0.2
-			positions[i][2] += (rand.Float32() - 0.5) * 0.2
+		for i := range atoms {
+			atoms[i].pos[0] += (rand.Float32() - 0.5) * 2 * float32(dt)
+			atoms[i].pos[1] += (rand.Float32() - 0.5) * 2 * float32(dt)
+			atoms[i].pos[2] += (rand.Float32() - 0.5) * 2 * float32(dt)
 		}
-		ssbo.Update(positions)
+		ssbo.Update(atoms)
 
 		window.Swap()
 	}
