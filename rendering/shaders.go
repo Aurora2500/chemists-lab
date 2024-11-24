@@ -12,39 +12,48 @@ type Shader struct {
 	locs map[string]int32
 }
 
+type shaderStage struct {
+	src   string
+	stage id
+}
+
 func NewShader(src string) (*Shader, error) {
-	var vertSrc, fragSrc string
-	var currSrc *string
+	var stages []shaderStage
 
 	for _, line := range strings.Split(src, "\n") {
-		if line == "//shader vertex" {
-			currSrc = &vertSrc
-			continue
-		} else if line == "//shader fragment" {
-			currSrc = &fragSrc
-			continue
+		if strings.HasPrefix(line, "//shader") {
+			var stageId id
+			switch line[len("//shader "):] {
+			case "vertex":
+				stageId = gl.VERTEX_SHADER
+			case "geometry":
+				stageId = gl.GEOMETRY_SHADER
+			case "fragment":
+				stageId = gl.FRAGMENT_SHADER
+			}
+			stages = append(stages, shaderStage{stage: stageId})
+		} else {
+			if len(stages) == 0 {
+				continue
+			}
+			stage := &stages[len(stages)-1]
+			stage.src += line + "\n"
 		}
-		if currSrc == nil {
-			continue
-		}
-
-		*currSrc = *currSrc + line + "\n"
 	}
-
 	var shader Shader
-	vert, err := compileShader(vertSrc, gl.VERTEX_SHADER)
-	if err != nil {
-		return nil, err
+	compiledStages := make([]id, len(stages))
+	for i := range stages {
+		var err error
+		compiledStages[i], err = compileShader(stages[i].src, stages[i].stage)
+		if err != nil {
+			return nil, err
+		}
 	}
-	frag, err := compileShader(fragSrc, gl.FRAGMENT_SHADER)
-	if err != nil {
-		return nil, err
-	}
-
 	shader.id = gl.CreateProgram()
 
-	gl.AttachShader(shader.id, vert)
-	gl.AttachShader(shader.id, frag)
+	for _, stage := range compiledStages {
+		gl.AttachShader(shader.id, stage)
+	}
 	gl.LinkProgram(shader.id)
 
 	var status int32
@@ -59,8 +68,9 @@ func NewShader(src string) (*Shader, error) {
 		return nil, fmt.Errorf("failed to link program: %v", log)
 	}
 
-	gl.DeleteShader(vert)
-	gl.DeleteShader(frag)
+	for _, stage := range compiledStages {
+		gl.DeleteShader(stage)
+	}
 
 	shader.locs = make(map[string]int32)
 	return &shader, nil
@@ -81,8 +91,7 @@ func compileShader(src string, shaderType id) (id, error) {
 
 		log := strings.Repeat("\x00", int(logLength+1))
 		gl.GetShaderInfoLog(shader, logLength, nil, gl.Str(log))
-		gpu_src := gl.GoStr(*csources)
-		return 0, fmt.Errorf("failed to compile %v: %v", gpu_src, log)
+		return 0, fmt.Errorf("failed to compile %v: %v", src, log)
 	}
 
 	return shader, nil

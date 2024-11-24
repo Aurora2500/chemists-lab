@@ -57,6 +57,12 @@ func CreateWindow(title string) (*Window, error) {
 	var win *Window = &Window{window: window, cbr: &CallbackRegistry{}}
 
 	gl.ClearColor(0.8, 0.8, 0.8, 1.0)
+	var geometry_limit int32
+	gl.GetIntegerv(gl.MAX_GEOMETRY_OUTPUT_VERTICES, &geometry_limit)
+	var geometry_instance_limit int32
+	gl.GetIntegerv(gl.MAX_GEOMETRY_SHADER_INVOCATIONS, &geometry_instance_limit)
+	println("max geometry output vertices", geometry_limit)
+	println("max geometry instancing", geometry_instance_limit)
 
 	win.setupRegistry()
 

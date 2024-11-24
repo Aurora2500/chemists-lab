@@ -17,7 +17,7 @@ func NewPeriodicTable() *PeriodicTable {
 	}
 
 	table.data = append(table.data,
-		AtomInfo{colorSize: rendering.Vec4{1, 1, 1, 0.4}},
+		AtomInfo{colorSize: rendering.Vec4{1, 1, 1, 0.6}},
 		AtomInfo{colorSize: rendering.Vec4{1, .1, .1, 0.9}},
 	)
 

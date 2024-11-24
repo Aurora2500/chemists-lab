@@ -39,22 +39,24 @@ func runApp() {
 
 	sphere := primitives.GenIcosphere(5, s)
 	type Vec3 = rendering.Vec3
-	type atom struct {
-		pos          Vec3
-		atomicNumber int32
+	type compound struct {
+		pos      Vec3
+		compound int32
 	}
-	atoms := []atom{
-		{pos: Vec3{0, 0, 0}, atomicNumber: 0},
-		{pos: Vec3{2, 0, 0}, atomicNumber: 1},
-		{pos: Vec3{-2, 0, 0}, atomicNumber: 0},
-		{pos: Vec3{0, 0, 2}, atomicNumber: 0},
-		{pos: Vec3{0, 0, -2}, atomicNumber: 1},
+	atoms := []compound{
+		{pos: Vec3{-3, 0, 0}, compound: 0},
+		{pos: Vec3{3, -.3, 0}, compound: 0},
+		{pos: Vec3{0, 0, 3}, compound: 1},
+		{pos: Vec3{4, 2, -3}, compound: 1},
+		{pos: Vec3{-2, -2, 5}, compound: 1},
+		{pos: Vec3{4, 1, 2}, compound: 1},
 	}
 
-	ssbo := rendering.NewSsbo[atom]()
+	ssbo := rendering.NewSsbo[compound]()
 	ssbo.Allocate(len(atoms), rendering.STREAM_DRAW)
 	ssbo.Update(atoms)
 	pt := game.NewPeriodicTable()
+	cinfo := game.NewCompoundInfo()
 
 	var timer win.Timer
 
@@ -64,7 +66,8 @@ func runApp() {
 
 		ccam.SetVP(s)
 		pt.Ssbo.BindShader(0)
-		ssbo.BindShader(1)
+		cinfo.BindShader(1)
+		ssbo.BindShader(2)
 		sphere.DrawInstanced(int32(len(atoms)))
 
 		for i := range atoms {
