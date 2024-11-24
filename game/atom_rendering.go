@@ -11,7 +11,7 @@ type PeriodicTable struct {
 	data []AtomInfo
 }
 
-func NewPeriodicTable() *PeriodicTable {
+func NewPeriodicTable() PeriodicTable {
 	table := PeriodicTable{
 		Ssbo: rendering.NewSsbo[AtomInfo](),
 	}
@@ -24,5 +24,5 @@ func NewPeriodicTable() *PeriodicTable {
 	table.Ssbo.Allocate(len(table.data), rendering.DYNAMIC_DRAW)
 	table.Ssbo.Update(table.data)
 
-	return &table
+	return table
 }

@@ -40,25 +40,16 @@ func runApp() {
 	sphere := primitives.GenIcosphere(5, s)
 	type Vec3 = rendering.Vec3
 	type Quat = rendering.Quat
-	type compound struct {
-		rotation Quat
-		pos      Vec3
-		compound int32
-	}
-	compounds := []compound{
-		{pos: Vec3{-3, 0, 0}, compound: 0, rotation: Quat{W: 1}},
-		{pos: Vec3{3, -.3, 0}, compound: 0, rotation: Quat{W: 1}},
-		{pos: Vec3{0, 0, 3}, compound: 1, rotation: Quat{W: 1}},
-		{pos: Vec3{4, 2, -3}, compound: 1, rotation: Quat{W: 1}},
-		{pos: Vec3{-2, -2, 5}, compound: 1, rotation: Quat{W: 1}},
-		{pos: Vec3{4, 1, 2}, compound: 1, rotation: Quat{W: 1}},
+	compounds := []game.Compound{
+		{Pos: Vec3{-3, 0, 0}, Compound: 0, Rotation: Quat{W: 1}},
+		{Pos: Vec3{3, -.3, 0}, Compound: 0, Rotation: Quat{W: 1}},
+		{Pos: Vec3{0, 0, 3}, Compound: 1, Rotation: Quat{W: 1}},
+		{Pos: Vec3{4, 2, -3}, Compound: 1, Rotation: Quat{W: 1}},
+		{Pos: Vec3{-2, -2, 5}, Compound: 1, Rotation: Quat{W: 1}},
+		{Pos: Vec3{4, 1, 2}, Compound: 1, Rotation: Quat{W: 1}},
 	}
 
-	ssbo := rendering.NewSsbo[compound]()
-	ssbo.Allocate(len(compounds), rendering.STREAM_DRAW)
-	ssbo.Update(compounds)
-	pt := game.NewPeriodicTable()
-	cinfo := game.NewCompoundInfo()
+	system := game.NewSystem(compounds)
 
 	var timer win.Timer
 
@@ -67,23 +58,23 @@ func runApp() {
 		dt := timer.Tick()
 
 		ccam.SetVP(s)
-		pt.Ssbo.BindShader(0)
-		cinfo.BindShader(1)
-		ssbo.BindShader(2)
+		system.Bind()
 		sphere.DrawInstanced(int32(len(compounds)))
-
-		for i := range compounds {
-			compounds[i].pos = compounds[i].pos.Add(
+		var i int = 0
+		system.Compounds.Update(func(c *game.Compound) {
+			c.Pos = c.Pos.Add(
 				Vec3{
 					rand.Float32(), rand.Float32(), rand.Float32(),
 				}.Add(Vec3{-.5, -.5, -.5}).Mul(2 * float32(dt)),
 			)
-
-			compounds[i].rotation = compounds[i].rotation.Mul(
-				rendering.RotateAround(float32(dt*float64(i)), Vec3{float32(i), 1, 1}.Normalize()),
+			c.Rotation = c.Rotation.Mul(
+				rendering.RotateAround(
+					10*float32(dt)*rand.Float32(),
+					Vec3{rand.Float32(), rand.Float32(), rand.Float32()}.Add(Vec3{-.5, -.5, -.5}).Normalize(),
+				),
 			)
-		}
-		ssbo.Update(compounds)
+			i += 1
+		})
 
 		window.Swap()
 	}

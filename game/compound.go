@@ -13,10 +13,15 @@ type CompoundInfo struct {
 	_        [12]byte
 }
 
-func NewCompoundInfo() *rendering.Ssbo[CompoundInfo] {
+type CompoundTable struct {
+	Ssbo  *rendering.Ssbo[CompoundInfo]
+	Table []CompoundInfo
+}
+
+func NewCompoundTable() CompoundTable {
 	type Vec3 = rendering.Vec3
 
-	cinfo := []CompoundInfo{
+	table := []CompoundInfo{
 		{
 			Atoms: [4]Atom{
 				{Position: Vec3{-.4, 0, 0}, AtomicNumber: 1},
@@ -35,8 +40,43 @@ func NewCompoundInfo() *rendering.Ssbo[CompoundInfo] {
 	}
 
 	ssbo := rendering.NewSsbo[CompoundInfo]()
-	ssbo.Allocate(len(cinfo), rendering.STATIC_DRAW)
-	ssbo.Update(cinfo)
+	ssbo.Allocate(len(table), rendering.STATIC_DRAW)
+	ssbo.Update(table)
 
-	return ssbo
+	return CompoundTable{
+		Ssbo:  ssbo,
+		Table: table,
+	}
+}
+
+type Compound struct {
+	Rotation Quat
+	Pos      Vec3
+	Compound int32
+}
+
+type CompoundCollection struct {
+	Ssbo      *rendering.Ssbo[Compound]
+	Compounds []Compound
+}
+
+func NewCollection(collection []Compound) CompoundCollection {
+	ssbo := rendering.NewSsbo[Compound]()
+	ssbo.Allocate(len(collection), rendering.DYNAMIC_DRAW)
+	ssbo.Update(collection)
+	return CompoundCollection{
+		Ssbo:      ssbo,
+		Compounds: collection,
+	}
+}
+
+func (col *CompoundCollection) NumCompounds() int {
+	return len(col.Compounds)
+}
+
+func (col *CompoundCollection) Update(update_func func(*Compound)) {
+	for i := range col.Compounds {
+		update_func(&col.Compounds[i])
+	}
+	col.Ssbo.Update(col.Compounds)
 }
