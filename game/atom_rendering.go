@@ -19,6 +19,8 @@ func NewPeriodicTable() PeriodicTable {
 	table.data = append(table.data,
 		AtomInfo{colorSize: rendering.Vec4{1, 1, 1, 0.6}},
 		AtomInfo{colorSize: rendering.Vec4{1, .1, .1, 0.9}},
+		AtomInfo{colorSize: rendering.Vec4{1, 1, .1, 1.1}},
+		AtomInfo{colorSize: rendering.Vec4{.3, .3, .3, 1}},
 	)
 
 	table.Ssbo.Allocate(len(table.data), rendering.DYNAMIC_DRAW)

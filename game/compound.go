@@ -7,8 +7,10 @@ type Atom struct {
 	AtomicNumber int32
 }
 
+type atomArray = [16]Atom
+
 type CompoundInfo struct {
-	Atoms    [4]Atom
+	Atoms    atomArray
 	NumAtoms int32
 	_        [12]byte
 }
@@ -23,19 +25,57 @@ func NewCompoundTable() CompoundTable {
 
 	table := []CompoundInfo{
 		{
-			Atoms: [4]Atom{
+			Atoms: atomArray{
 				{Position: Vec3{-.4, 0, 0}, AtomicNumber: 1},
 				{Position: Vec3{+.4, 0, 0}, AtomicNumber: 1},
 			},
 			NumAtoms: 2,
 		},
 		{
-			Atoms: [4]Atom{
+			Atoms: atomArray{
 				{Position: Vec3{0, 0.2, 0}, AtomicNumber: 1},
 				{Position: Vec3{-0.7, -0.2, 0}, AtomicNumber: 0},
 				{Position: Vec3{+0.7, -0.2, 0}, AtomicNumber: 0},
 			},
 			NumAtoms: 3,
+		},
+		{
+			Atoms: atomArray{
+				{Position: Vec3{+1.1, -0.2, 0}, AtomicNumber: 0},
+				{Position: Vec3{+.4, +.2, 0}, AtomicNumber: 1},
+				{Position: Vec3{-.4, +.2, 0}, AtomicNumber: 1},
+				{Position: Vec3{-1.1, -0.2, 0}, AtomicNumber: 0},
+			},
+			NumAtoms: 4,
+		},
+		{
+			Atoms: atomArray{
+				{Position: Vec3{0, 0, 0}, AtomicNumber: 2},
+				{Position: Vec3{0, +.4, +.7}, AtomicNumber: 1},
+				{Position: Vec3{0, +.4, -.7}, AtomicNumber: 1},
+				{Position: Vec3{+.7, -.6, 0}, AtomicNumber: 1},
+				{Position: Vec3{-.7, -.6, 0}, AtomicNumber: 1},
+				{Position: Vec3{+1.4, -.3, 0}, AtomicNumber: 0},
+				{Position: Vec3{-1.4, -.3, 0}, AtomicNumber: 0},
+			},
+			NumAtoms: 7,
+		},
+		{
+			Atoms: atomArray{
+				{Position: Vec3{+1.4, 0, 0}, AtomicNumber: 3},
+				{Position: Vec3{-1.4, 0, 0}, AtomicNumber: 3},
+				{Position: Vec3{+.57, +1.1, 0}, AtomicNumber: 3},
+				{Position: Vec3{-.57, +1.1, 0}, AtomicNumber: 3},
+				{Position: Vec3{+.57, -1.1, 0}, AtomicNumber: 3},
+				{Position: Vec3{-.57, -1.1, 0}, AtomicNumber: 3},
+				{Position: Vec3{+2.5, 0, 0}, AtomicNumber: 0},
+				{Position: Vec3{-2.5, 0, 0}, AtomicNumber: 0},
+				{Position: Vec3{+1.3, +1.9, 0}, AtomicNumber: 0},
+				{Position: Vec3{-1.3, +1.9, 0}, AtomicNumber: 0},
+				{Position: Vec3{+1.3, -1.9, 0}, AtomicNumber: 0},
+				{Position: Vec3{-1.3, -1.9, 0}, AtomicNumber: 0},
+			},
+			NumAtoms: 12,
 		},
 	}
 

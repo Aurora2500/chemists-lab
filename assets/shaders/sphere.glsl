@@ -27,7 +27,7 @@ struct Atom {
 };
 
 struct CompoundInfo {
-	Atom atoms[4];
+	Atom atoms[16];
 	int numAtoms;
 };
 
