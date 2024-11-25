@@ -15,7 +15,7 @@ void main() {
 #version 430
 
 layout(triangles) in;
-layout(triangle_strip, max_vertices = 96) out;
+layout(triangle_strip, max_vertices = 48) out;
 
 layout(std430, binding = 0) buffer PeriodicTable {
 	vec4 atomInfo[];
@@ -53,6 +53,7 @@ in int compound[];
 
 out vec3 normal;
 out vec3 col;
+out vec4 viewPos;
 
 mat4 quat_pos_to_homo(vec4 quat, vec3 pos) {
 	float x = quat.x;
@@ -80,7 +81,8 @@ void main() {
 		vec4 ainfo = atomInfo[atom.atomicNumber];
 		for (int i = 0; i < 3; i++) {
 			vec3 p = ainfo.w * vPos[i] + atom.position;
-			gl_Position = proj * view * model * vec4(p, 1);
+			viewPos = view * model * vec4(p, 1);
+			gl_Position = proj * viewPos;
 			col = ainfo.rgb;
 			normal = mat3(model) * vPos[i];
 			EmitVertex();
@@ -94,6 +96,7 @@ void main() {
 
 in vec3 normal;
 in vec3 col;
+in vec4 viewPos;
 
 out vec4 frag_col;
 
@@ -102,5 +105,13 @@ const vec3 light = vec3(0.3, 0.9, 0.3);
 void main() {
 	float d = max(dot(normal, light), 0);
 	float i = mix(0.3, 0.9, d);
+
+	vec3 viewDir = normalize(-viewPos.xyz);
+	vec3 halfDir = normalize(viewDir + light);
+	float specAngle = max(dot(halfDir, normal), 0);
+	float specular = pow(specAngle, 12);
+
+	i += 0.2 * specular;
+
 	frag_col = vec4(col * i, 1);
 }
