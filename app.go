@@ -4,9 +4,11 @@ import (
 	"chemists-lab/game"
 	"chemists-lab/rendering"
 	"chemists-lab/rendering/primitives"
+	"chemists-lab/rendering/text"
 	"chemists-lab/resources"
 	win "chemists-lab/windowing"
-	"math/rand"
+
+	"golang.org/x/image/font/opentype"
 )
 
 func runApp() {
@@ -27,6 +29,14 @@ func runApp() {
 		Fov:    60.,
 	}
 
+	f := manager.GetFont("NotoSans")
+	face, _ := opentype.NewFace(f, nil)
+	atlas := text.NewAtlas(face, []rune("abcde"))
+	tex := rendering.NewTexture()
+	tex.Upload(atlas.Image)
+	ts := manager.GetShader("tex")
+	q := primitives.GenQuad(ts)
+
 	ccam := game.CamController{
 		Cam:         cam,
 		Lens:        lens,
@@ -38,6 +48,7 @@ func runApp() {
 	s.Use()
 
 	sphere := primitives.GenIcosphere(5, s)
+	_ = sphere
 	type Vec3 = rendering.Vec3
 	type Quat = rendering.Quat
 	norot := Quat{W: 1}
@@ -54,31 +65,37 @@ func runApp() {
 	}
 
 	system := game.NewSystem(compounds)
+	_ = system
 
 	var timer win.Timer
+	_ = timer
 
 	for window.Running() {
 		window.Clear()
-		dt := timer.Tick()
 
-		ccam.SetVP(s)
-		system.Bind()
-		sphere.DrawInstanced(int32(len(compounds)))
-		var i int = 0
-		system.Compounds.Update(func(c *game.Compound) {
-			c.Pos = c.Pos.Add(
-				Vec3{
-					rand.Float32(), rand.Float32(), rand.Float32(),
-				}.Add(Vec3{-.5, -.5, -.5}).Mul(2 * float32(dt)),
-			)
-			c.Rotation = c.Rotation.Mul(
-				rendering.RotateAround(
-					10*float32(dt)*rand.Float32(),
-					Vec3{rand.Float32(), rand.Float32(), rand.Float32()}.Add(Vec3{-.5, -.5, -.5}).Normalize(),
-				),
-			)
-			i += 1
-		})
+		// dt := timer.Tick()
+
+		// ccam.SetVP(s)
+		// system.Bind()
+		// sphere.DrawInstanced(int32(len(compounds)))
+		// var i int = 0
+		// system.Compounds.Update(func(c *game.Compound) {
+		// 	c.Pos = c.Pos.Add(
+		// 		Vec3{
+		// 			rand.Float32(), rand.Float32(), rand.Float32(),
+		// 		}.Add(Vec3{-.5, -.5, -.5}).Mul(2 * float32(dt)),
+		// 	)
+		// 	c.Rotation = c.Rotation.Mul(
+		// 		rendering.RotateAround(
+		// 			10*float32(dt)*rand.Float32(),
+		// 			Vec3{rand.Float32(), rand.Float32(), rand.Float32()}.Add(Vec3{-.5, -.5, -.5}).Normalize(),
+		// 		),
+		// 	)
+		// 	i += 1
+		// })
+
+		ts.SetUniformTex2D("tex", &tex, 0)
+		q.Draw()
 
 		window.Swap()
 	}

@@ -119,6 +119,12 @@ func (s *Shader) get_uniform_loc(name string) int32 {
 }
 
 func (s *Shader) SetUniformMat4(uniform string, x Mat4) {
-	loc := int32(s.get_uniform_loc(uniform))
+	loc := s.get_uniform_loc(uniform)
 	gl.ProgramUniformMatrix4fv(s.id, loc, 1, false, &x[0])
+}
+
+func (s *Shader) SetUniformTex2D(uniform string, tex *Texture2D, unit uint32) {
+	loc := s.get_uniform_loc(uniform)
+	tex.BindUnit(unit)
+	gl.ProgramUniform1i(s.id, loc, int32(unit))
 }
