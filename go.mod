@@ -7,3 +7,5 @@ require (
 	github.com/go-gl/glfw v0.0.0-20240506104042-037f3cc74f2a
 	github.com/go-gl/mathgl v1.2.0
 )
+
+require golang.org/x/image v0.22.0 // indirect
