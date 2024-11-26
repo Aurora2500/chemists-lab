@@ -5,7 +5,6 @@ import (
 	"reflect"
 
 	"github.com/go-gl/gl/v4.3-core/gl"
-	"github.com/go-gl/mathgl/mgl32"
 )
 
 const attrib_tag = "attrib"
@@ -40,13 +39,13 @@ func set_attrib(loc id, vertex reflect.Type, field reflect.StructField) error {
 
 	var num int32
 	switch field.Type {
-	case reflect.TypeOf((*float32)(nil)).Elem():
+	case reflect.TypeFor[float32]():
 		num = 1
-	case reflect.TypeOf((*mgl32.Vec2)(nil)).Elem():
+	case reflect.TypeFor[Vec2]():
 		num = 2
-	case reflect.TypeOf((*mgl32.Vec3)(nil)).Elem():
+	case reflect.TypeFor[Vec3]():
 		num = 3
-	case reflect.TypeOf((*mgl32.Vec4)(nil)).Elem():
+	case reflect.TypeFor[Vec4]():
 		num = 4
 	default:
 		return ErrUnhandledType
@@ -56,7 +55,7 @@ func set_attrib(loc id, vertex reflect.Type, field reflect.StructField) error {
 }
 
 func NewVao[T any](program *Shader, vbo *Vbo) (*Vao, error) {
-	t := reflect.TypeOf((*T)(nil)).Elem()
+	t := reflect.TypeFor[T]()
 	if t.Kind() != reflect.Struct {
 		return nil, ErrNonStructVertex
 	}
