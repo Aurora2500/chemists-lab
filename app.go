@@ -93,7 +93,7 @@ func runApp() {
 		// 	)
 		// 	i += 1
 		// })
-
+		ts.Use()
 		ts.SetUniformTex2D("tex", &tex, 0)
 		q.Draw()
 
