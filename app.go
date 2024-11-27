@@ -8,6 +8,7 @@ import (
 	"chemists-lab/resources"
 	win "chemists-lab/windowing"
 
+	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
 )
 
@@ -30,8 +31,12 @@ func runApp() {
 	}
 
 	f := manager.GetFont("NotoSans")
-	face, _ := opentype.NewFace(f, nil)
-	atlas := text.NewAtlas(face, []rune("abcde"))
+	face, _ := opentype.NewFace(f, &opentype.FaceOptions{
+		Size:    72,
+		DPI:     200,
+		Hinting: font.HintingNone,
+	})
+	atlas := text.NewAtlas(face, text.RuneRange{From: '!', To: '~'})
 	tex := rendering.NewTexture()
 	tex.Upload(atlas.Image)
 	ts := manager.GetShader("tex")

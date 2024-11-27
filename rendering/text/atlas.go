@@ -15,7 +15,7 @@ type Atlas struct {
 
 const numCols = 16
 
-func NewAtlas(face font.Face, alphabet []rune) *Atlas {
+func NewAtlas(face font.Face, alphabet Alphabet) *Atlas {
 	type gylphInfo struct {
 		pos     image.Point
 		dims    image.Point
@@ -28,7 +28,7 @@ func NewAtlas(face font.Face, alphabet []rune) *Atlas {
 	nextLine := 0
 	maxWidth := 0
 	col := 0
-	for _, r := range alphabet {
+	for _, r := range alphabet.Runes() {
 		bounds, advance, ok := face.GlyphBounds(r)
 		if !ok {
 			println("Rune not in face:", r)
@@ -46,17 +46,17 @@ func NewAtlas(face font.Face, alphabet []rune) *Atlas {
 		}
 		nextLine = max(nextLine, currPos.Y+dims.Y)
 		maxWidth = max(maxWidth, currPos.X+dims.X)
-		currPos.X += dims.X
+		currPos.X += dims.X + 4
 		col++
 		if col >= numCols {
 			col = 0
 			currPos.X = 0
-			currPos.Y = nextLine
+			currPos.Y = nextLine + 4
 		}
 	}
 
-	atlas := image.NewAlpha(image.Rectangle{Max: image.Point{X: maxWidth, Y: nextLine}})
-	inv := FlippedImage{Image: atlas}
+	atlas := image.NewAlpha(image.Rectangle{Max: image.Point{X: maxWidth, Y: nextLine + 3}})
+	inv := &FlippedImage{Image: atlas}
 	white := image.White
 
 	m1 := fixed.I(-1)
@@ -66,7 +66,10 @@ func NewAtlas(face font.Face, alphabet []rune) *Atlas {
 			Max: info.dims.Add(info.pos),
 		}
 		_, m, mp, _, _ := face.Glyph(info.bounds.Min.Mul(m1), r)
-		draw.DrawMask(&inv, atlasPos, white, image.Point{}, m, mp, draw.Over)
+		// if r == 'a' {
+		// 	println(atlasPos.Max)
+		// }
+		draw.DrawMask(inv, atlasPos, white, image.Point{}, m, mp, draw.Over)
 	}
 
 	return &Atlas{

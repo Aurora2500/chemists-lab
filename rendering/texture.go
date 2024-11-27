@@ -13,6 +13,9 @@ type Texture2D struct {
 func NewTexture() Texture2D {
 	var id id
 	gl.GenTextures(1, &id)
+	gl.BindTexture(gl.TEXTURE_2D, id)
+	gl.TextureParameteri(id, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+	gl.TextureParameteri(id, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
 
 	return Texture2D{id: id}
 }
