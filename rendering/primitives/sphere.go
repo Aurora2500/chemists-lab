@@ -9,7 +9,7 @@ func midpoint(a, b rendering.Vec3) rendering.Vec3 {
 	return a.Add(b).Mul(0.5).Normalize()
 }
 
-func GenIcosphere(subdivs int, s *rendering.Shader) rendering.Mesh {
+func GenIcosphere(subdivs int, l rendering.AttribLocator) rendering.Mesh {
 	phi := float32(math.Phi)
 
 	vertices := []rendering.Vec3{
@@ -76,6 +76,6 @@ func GenIcosphere(subdivs int, s *rendering.Shader) rendering.Mesh {
 		indices[3*i+2] = faces[i][2]
 	}
 
-	mesh := rendering.NewIndexedMesh(verts, indices, s)
+	mesh := rendering.NewIndexedMesh(verts, indices, l)
 	return &mesh
 }

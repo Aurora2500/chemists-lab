@@ -2,6 +2,7 @@ package rendering
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/go-gl/gl/v4.3-core/gl"
@@ -127,4 +128,40 @@ func (s *Shader) SetUniformTex2D(uniform string, tex *Texture2D, unit uint32) {
 	loc := s.get_uniform_loc(uniform)
 	tex.BindUnit(unit)
 	gl.ProgramUniform1i(s.id, loc, int32(unit))
+}
+
+type AttribLocator interface {
+	Locate(field reflect.StructField, idx int) int32
+}
+
+type ShaderLocator struct {
+	Shader *Shader
+}
+
+func (sl ShaderLocator) Locate(field reflect.StructField, idx int) int32 {
+	attrib := field.Tag.Get("attrib")
+	if attrib == "" {
+		attrib = field.Name
+	}
+	return gl.GetAttribLocation(sl.Shader.id, gl.Str(attrib+"\x00"))
+}
+
+type MapLocator map[string]int32
+
+func (ml MapLocator) Locate(field reflect.StructField, idx int) int32 {
+	attrib := field.Tag.Get("attrib")
+	if attrib == "" {
+		attrib = field.Name
+	}
+	loc, ok := ml[attrib]
+	if !ok {
+		return -1
+	}
+	return loc
+}
+
+type PosLocator struct{}
+
+func (pl PosLocator) Locate(field reflect.StructField, idx int) int32 {
+	return int32(idx)
 }

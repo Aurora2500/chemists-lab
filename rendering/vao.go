@@ -54,7 +54,7 @@ func set_attrib(loc id, vertex reflect.Type, field reflect.StructField) error {
 	return nil
 }
 
-func NewVao[T any](program *Shader, vbo *Vbo) (*Vao, error) {
+func NewVao[T any](locator AttribLocator, vbo *Vbo) (*Vao, error) {
 	t := reflect.TypeFor[T]()
 	if t.Kind() != reflect.Struct {
 		return nil, ErrNonStructVertex
@@ -68,11 +68,11 @@ func NewVao[T any](program *Shader, vbo *Vbo) (*Vao, error) {
 
 	for i := 0; i < t.NumField(); i++ {
 		f := t.Field(i)
-		name := f.Tag.Get(attrib_tag)
-		if name == "" {
-			name = f.Name
+		floc := locator.Locate(f, i)
+		if floc < 0 {
+			panic("attribute location not found")
 		}
-		loc := uint32(gl.GetAttribLocation(program.id, gl.Str(name+"\x00")))
+		loc := uint32(floc)
 		gl.VertexArrayAttribBinding(vao.id, loc, 0)
 		gl.EnableVertexArrayAttrib(vao.id, loc)
 		set_attrib(loc, t, f)

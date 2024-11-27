@@ -2,7 +2,7 @@ package primitives
 
 import "chemists-lab/rendering"
 
-func GenQuad(s *rendering.Shader) rendering.Mesh {
+func GenQuad(l rendering.AttribLocator) rendering.Mesh {
 	type Vec2 = rendering.Vec2
 	verts := []vertex2{
 		{pos: Vec2{0, 0}, uv: Vec2{0, 0}},
@@ -16,6 +16,6 @@ func GenQuad(s *rendering.Shader) rendering.Mesh {
 		0, 2, 3,
 	}
 
-	mesh := rendering.NewIndexedMesh(verts, indices, s)
+	mesh := rendering.NewIndexedMesh(verts, indices, l)
 	return &mesh
 }

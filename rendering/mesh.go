@@ -14,12 +14,12 @@ type ObjectMesh struct {
 	vbo *Vbo
 }
 
-func NewObjectMesh[V any](verts []V, s *Shader) ObjectMesh {
+func NewObjectMesh[V any](verts []V, l AttribLocator) ObjectMesh {
 	vbo, err := NewVbo(verts)
 	if err != nil {
 		panic(err)
 	}
-	vao, err := NewVao[V](s, vbo)
+	vao, err := NewVao[V](l, vbo)
 	if err != nil {
 		panic(err)
 	}
@@ -34,8 +34,8 @@ type IndexedMesh struct {
 	ebo *Ebo
 }
 
-func NewIndexedMesh[V any, I OpenGLIndex](verts []V, indices []I, s *Shader) IndexedMesh {
-	mesh := NewObjectMesh(verts, s)
+func NewIndexedMesh[V any, I OpenGLIndex](verts []V, indices []I, l AttribLocator) IndexedMesh {
+	mesh := NewObjectMesh(verts, l)
 	ebo := NewEBO(indices)
 	mesh.vao.BindEbo(ebo)
 	return IndexedMesh{

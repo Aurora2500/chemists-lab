@@ -35,7 +35,7 @@ func runApp() {
 	tex := rendering.NewTexture()
 	tex.Upload(atlas.Image)
 	ts := manager.GetShader("tex")
-	q := primitives.GenQuad(ts)
+	q := primitives.GenQuad(rendering.ShaderLocator{Shader: ts})
 
 	ccam := game.CamController{
 		Cam:         cam,
@@ -47,7 +47,7 @@ func runApp() {
 	s := manager.GetShader("sphere")
 	s.Use()
 
-	sphere := primitives.GenIcosphere(5, s)
+	sphere := primitives.GenIcosphere(5, rendering.ShaderLocator{Shader: s})
 	_ = sphere
 	type Vec3 = rendering.Vec3
 	type Quat = rendering.Quat
